@@ -3,7 +3,7 @@ idena检测是否掉线脚本
 by scoful
 """
 '''
-cron: 0 1 * * * idena_check_online_bot.py
+cron: 0 */1 * * * idena_check_online_bot.py
 new Env('idena检测是否掉线');
 '''
 
