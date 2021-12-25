@@ -5,7 +5,7 @@ by sunflo
 原地址：https://github.com/sunflo/smzdm_sign_bot
 """
 '''
-cron: 0 1 * * * smzdm_auto_sign_bot.py
+cron: 0 1 * * * ? smzdm_auto_sign_bot.py
 new Env('什么值得买自动签到');
 '''
 
