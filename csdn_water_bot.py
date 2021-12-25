@@ -3,7 +3,7 @@ CSDN水阅读量脚本
 by scoful
 """
 '''
-cron: 0 1 * * * csdn_water_bot.py
+cron: */10 * * * * ? csdn_water_bot.py
 new Env('CSDN水阅读量');
 '''
 
