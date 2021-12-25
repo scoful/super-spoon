@@ -1,4 +1,10 @@
 # super-spoon
+基于青龙面板实现
+
+## 使用方法
+- 方法一：进入青龙面板容器，运行命令： `ql repo https://ghproxy.com/https://github.com/scoful/super-spoon.git`
+- 方法二：在青龙面板首页右上角，添加任务，名称和定时规则随便输入，命令填：`ql repo https://ghproxy.com/https://github.com/scoful/super-spoon.git` ，成功后再删了任务
+
 
 ## 支持的脚本说明
 
