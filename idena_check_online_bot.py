@@ -16,7 +16,7 @@ import requests
 # 检测用的url
 CHECK_URL = 'https://api.idena.org/api/onlineidentity/'
 
-# 环境变量中用于存放account的key值
+# 环境变量中用于存放account的key值,多个用&分隔
 KEY_OF_ACCOUNT = "IDENA_ACCOUNT"
 
 
