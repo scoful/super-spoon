@@ -38,7 +38,7 @@ DEFAULT_HEADERS = {
 # 签到用的url
 SIGN_URL = 'https://points.qingcloud.com/api/scorecheckin/checkin?'
 
-# 环境变量中用于存放cookie的key值
+# 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "QINGCLOUD_COOKIE"
 
 
@@ -96,7 +96,7 @@ def logout(self):
 if __name__ == '__main__':
     bot = SignBot()
     cookies = os.environ[KEY_OF_COOKIE]
-    cookieList = cookies.split("&")
+    cookieList = cookies.split("|")
     logout("检测到{}个cookie记录\n开始签到".format(len(cookieList)))
     index = 0
     load_send()
