@@ -15,6 +15,7 @@ import requests
 
 # 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "CSDN_ARTICLE_ID"
+KEY_OF_ACCOUNT = "CSDN_ACCOUNT"
 
 
 def logout(self):
@@ -38,8 +39,9 @@ def water(url):
 
 if __name__ == '__main__':
     cookies = os.environ[KEY_OF_COOKIE]
+    account = os.environ[KEY_OF_ACCOUNT]
     cookieList = cookies.split("&")
     logout("检测到{}个文章记录\n开始水".format(len(cookieList)))
     for c in cookieList:
-        water("https://blog.csdn.net/Scoful/article/details/" + c)
+        water("https://blog.csdn.net/" + account + "/article/details/" + c)
     logout("CSDN刷阅读量结束")
