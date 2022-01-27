@@ -16,6 +16,9 @@ import requests
 # 检测用的url
 CHECK_URL = 'https://api.idena.org/api/onlineidentity/'
 
+# 获取epoch信息
+EPOCH_URL = 'https://api.idena.io/api/epoch/last'
+
 # 环境变量中用于存放account的key值,多个用&分隔
 KEY_OF_ACCOUNT = "IDENA_ACCOUNT"
 
@@ -39,6 +42,12 @@ class CheckBot(object):
             return True
         except Exception as e:
             return False
+
+    def getEpochInfo(self):
+        msg = requests.get(EPOCH_URL)
+        if self.__json_check(msg):
+            return msg.json()
+        return msg.content
 
 
 def load_send() -> None:
@@ -67,6 +76,8 @@ if __name__ == '__main__':
     logout("检测到{}个账号记录\n开始".format(len(accountList)))
     index = 0
     load_send()
+    epoch = bot.getEpochInfo()
+    validationTime = epoch["validationTime"]
     for c in accountList:
         result = bot.checkOnline(c)
         msg = ""
@@ -74,7 +85,7 @@ if __name__ == '__main__':
             msg = c + " 似乎写错了，检查一下！"
         else:
             if result["result"]["online"] == False:
-                msg = c + " 掉线啦！快瞅瞅"
+                msg = "第" + (index + 1) + "个账号：" + c + " 掉线啦！快瞅瞅\n注意下次考试时间:" + validationTime
         if send and len(msg) > 0:
             send("idena检测:", msg)
         index += 1
