@@ -77,7 +77,8 @@ if __name__ == '__main__':
     index = 0
     load_send()
     epoch = bot.getEpochInfo()
-    validationTime = epoch["validationTime"]
+    validationTimeStr = epoch["result"]["validationTime"]
+    validationTime = datetime.strptime(validationTimeStr, '%Y-%m-%dT%H:%M:%SZ') + datetime.timedelta(hours=8)
     for c in accountList:
         result = bot.checkOnline(c)
         msg = ""
