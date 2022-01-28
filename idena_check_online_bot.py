@@ -8,6 +8,7 @@ new Env('idena检测是否掉线');
 '''
 
 import datetime
+import datetime as dt
 import os
 import sys
 
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     load_send()
     epoch = bot.getEpochInfo()
     validationTimeStr = epoch["result"]["validationTime"]
-    validationTime = datetime.strptime(validationTimeStr, '%Y-%m-%dT%H:%M:%SZ') + datetime.timedelta(hours=8)
+    validationTime = dt.datetime.strptime(validationTimeStr, '%Y-%m-%dT%H:%M:%SZ') + datetime.timedelta(hours=8)
     for c in accountList:
         result = bot.checkOnline(c)
         msg = ""
