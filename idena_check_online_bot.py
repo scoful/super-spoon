@@ -87,7 +87,7 @@ if __name__ == '__main__':
             msg = c + " 似乎写错了，检查一下！"
         else:
             if result["result"]["online"] == False:
-                msg = "第" + (index + 1) + "个账号：" + c + " 掉线啦！快瞅瞅\n注意下次考试时间:" + validationTime
+                msg = "第" + (index + 1) + "个账号：" + c + " 掉线啦！快瞅瞅\n注意下次考试时间:" + validationTime.strftime("%Y-%m-%d %H:%M:%S")
         if send and len(msg) > 0:
             send("idena检测:", msg)
         index += 1
