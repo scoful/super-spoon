@@ -105,6 +105,6 @@ if __name__ == '__main__':
         result = bot.checkin(c)
         logout(result)
         if send:
-            send("科技玩家自动签到，获得 :" + result + " 分", resutl)
+            send("科技玩家自动签到，获得 :" + result + " 分", result)
         index += 1
     logout("签到结束")
