@@ -3,7 +3,7 @@
 by scoful
 """
 '''
-cron: 0 2 */5 * * ? qingcloud_auto_sign_bot.py
+cron: 2 */5 * * * qingcloud_auto_sign_bot.py
 new Env('青云自动签到');
 '''
 

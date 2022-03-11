@@ -3,7 +3,7 @@
 by scoful
 """
 '''
-cron: 0 2 */5 * * ? kejiwanjia_auto_sign_bot.py
+cron: 2 */5 * * * kejiwanjia_auto_sign_bot.py
 new Env('科技玩家自动签到');
 '''
 
@@ -48,7 +48,7 @@ class SignBot(object):
         # 添加 headers
         self.session.headers = DEFAULT_HEADERS
 
-    def __json_check(self, msg):
+    def json_check(self, msg):
         """
         判断是否 json 形式
         """
@@ -69,7 +69,7 @@ class SignBot(object):
         签到函数
         """
         msg = self.session.post(SIGN_URL)
-        if self.__json_check(msg):
+        if self.json_check(msg):
             return msg.json()
         return msg.content
 
@@ -104,7 +104,13 @@ if __name__ == '__main__':
         bot.load_cookie_str(c)
         result = bot.checkin(c)
         logout(result)
+        credit = ""
+        if bot.json_check(result):
+            credit = result["credit"]
+            logout(credit)
+        else:
+            credit = result
         if send:
-            send("科技玩家自动签到，获得 :" + result + " 分", result)
+            send("科技玩家自动签到，获得 :" + credit + " 分", "")
         index += 1
     logout("签到结束")
