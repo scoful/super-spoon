@@ -111,6 +111,6 @@ if __name__ == '__main__':
         else:
             credit = result
         if send:
-            send("科技玩家自动签到，获得 :" + credit + " 分", "")
+            send("科技玩家自动签到，获得 : " + credit + " 分", "good job！")
         index += 1
     logout("签到结束")
