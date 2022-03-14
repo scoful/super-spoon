@@ -9,6 +9,7 @@ new Env('科技玩家自动签到');
 
 import datetime
 import os
+import random
 import sys
 
 import requests
@@ -17,26 +18,28 @@ import requests
 http headers
 """
 DEFAULT_HEADERS = {
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+    'Accept': 'application/json, text/plain, */*',
     'Accept-Encoding': 'gzip, deflate, br',
     'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
     'Connection': 'keep-alive',
-    # 'Host': 'points.qingcloud.com',
+    'Host': 'www.kejiwanjia.com',
     'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'none',
     'Sec-Fetch-User': '?1',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
     'Cache-Control': 'max-age=0',
     'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
     'DNT': '1',
     'Upgrade-Insecure-Requests': '1',
+    'Referer': 'https://www.kejiwanjia.com/gold/credit',
+    'Origin': 'https://www.kejiwanjia.com',
 }
 
 # 签到用的url
 SIGN_URL = 'https://www.kejiwanjia.com/wp-json/b2/v1/userMission'
+UserAgent = ''
 
 # 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "KEJIWANJIA_COOKIE"
@@ -63,6 +66,7 @@ class SignBot(object):
         起一个带cookie的session
         """
         self.session.headers['Authorization'] = cookies
+        self.session.headers['User-Agent'] = self.userAgent()
 
     def checkin(self, cookies):
         """
@@ -72,6 +76,26 @@ class SignBot(object):
         if self.json_check(msg):
             return msg.json()
         return msg.content
+
+    def userAgent(self):
+        """
+        随机生成一个UA
+        :return: jdapp;iPhone;9.4.8;14.3;xxxx;network/wifi;ADID/201EDE7F-5111-49E8-9F0D-CCF9677CD6FE;supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone13,4;addressid/2455696156;supportBestPay/0;appBuild/167629;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1
+        """
+        if not UserAgent:
+            uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
+            addressid = ''.join(random.sample('1234567898647', 10))
+            iosVer = ''.join(
+                random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
+            iosV = iosVer.replace('.', '_')
+            iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
+            ADID = ''.join(random.sample('0987654321ABCDEF', 8)) + '-' + ''.join(
+                random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(
+                random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(
+                random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 12))
+            return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/{ADID};supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone{iPhone},1;addressid/{addressid};supportBestPay/0;appBuild/167629;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS {iosV} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1'
+        else:
+            return UserAgent
 
 
 def load_send() -> None:
@@ -104,13 +128,13 @@ if __name__ == '__main__':
         bot.load_cookie_str(c)
         result = bot.checkin(c)
         logout(result)
-        credit = ""
+        credit = 0
         if bot.json_check(result):
-            credit = result["credit"]
+            credit = int(result["credit"])
             logout(credit)
         else:
-            credit = result
+            credit = int(result)
         if send:
-            send("科技玩家自动签到，获得 : " + credit + " 分", "good job！")
+            send("科技玩家自动签到，获得 : " + str(credit) + " 分", "good job！")
         index += 1
     logout("签到结束")
