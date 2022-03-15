@@ -8,6 +8,7 @@ new Env('faker engine自动签到');
 '''
 
 import datetime
+import json
 import os
 import random
 import sys
@@ -133,7 +134,11 @@ if __name__ == '__main__':
             credit = int(result["credit"])
             logout(credit)
         else:
-            credit = int(result)
+            js = json.loads(json.dumps(eval(result)))
+            if bot.json_check(js):
+                credit = js["credit"]
+            else:
+                credit = int(result)
         if send:
             send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
         index += 1
