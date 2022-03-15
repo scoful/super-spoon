@@ -19,23 +19,23 @@ import requests
 http headers
 """
 DEFAULT_HEADERS = {
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-    'Connection': 'keep-alive',
-    'Host': 'www.fakerengine.com',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'none',
-    'Sec-Fetch-User': '?1',
-    'Cache-Control': 'max-age=0',
+    'accept': 'application/json, text/plain, */*',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'connection': 'keep-alive',
+    'host': 'www.fakerengine.com',
+    'sec-fetch-dest': 'document',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'none',
+    'sec-fetch-user': '?1',
+    'cache-control': 'max-age=0',
     'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
-    'DNT': '1',
-    'Upgrade-Insecure-Requests': '1',
-    'Referer': 'https://www.fakerengine.com/gold/credit',
-    'Origin': 'https://www.fakerengine.com',
+    'dnt': '1',
+    'upgrade-insecure-requests': '1',
+    'referer': 'https://www.fakerengine.com/gold/credit',
+    'origin': 'https://www.fakerengine.com',
 }
 
 # 签到用的url
@@ -67,7 +67,7 @@ class SignBot(object):
         起一个带cookie的session
         """
         self.session.headers['authorization'] = cookies
-        self.session.headers['User-Agent'] = self.userAgent()
+        self.session.headers['user-agent'] = self.userAgent()
 
     def checkin(self, cookies):
         """
