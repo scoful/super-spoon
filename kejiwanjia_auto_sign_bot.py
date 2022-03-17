@@ -111,9 +111,8 @@ if __name__ == '__main__':
         result = bot.checkin(c)
         logout(result)
         credit = 0
-        if bot.json_check(result):
-            credit = int(result["credit"])
-            logout(credit)
+        if result.isdigit():
+            credit = int(result)
         else:
             js = json.loads(json.dumps(eval(bytes.decode(result))))
             if bot.json_check(js):
