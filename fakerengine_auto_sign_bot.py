@@ -39,6 +39,7 @@ DEFAULT_HEADERS = {
 
 # 签到用的url
 SIGN_URL = 'https://www.fakerengine.com/wp-json/b2/v1/userMission'
+GET_USER_INFO_URL = 'https://www.fakerengine.com/wp-json/b2/v1/getUserInfo'
 
 # 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "FAKERENGINE_COOKIE"
@@ -74,6 +75,13 @@ class SignBot(object):
             return msg.json()
         return msg.content
 
+    def getUserInfo(self, cookies):
+        msg = self.client.post(GET_USER_INFO_URL)
+        if msg.status_code == 403:
+            return False
+        else:
+            return True
+
 
 def load_send() -> None:
     logout("加载推送功能中...")
@@ -103,14 +111,18 @@ if __name__ == '__main__':
     load_send()
     for c in cookieList:
         bot.load_cookie_str(c)
-        result = bot.checkin(c)
-        logout(result)
-        credit = 0
-        try:
-            credit = result["credit"]
-        except Exception as e:
-            credit = int(result)
-        if send:
-            send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
+        if bot.getUserInfo(c):
+            result = bot.checkin(c)
+            logout(result)
+            credit = 0
+            try:
+                credit = result["credit"]
+            except Exception as e:
+                credit = int(result)
+            if send:
+                send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
+        else:
+            if send:
+                send("faker engine token失效！", "oop!!!")
         index += 1
     logout("签到结束")
