@@ -8,32 +8,31 @@ new Env('科技玩家自动签到');
 '''
 
 import datetime
-import json
-
-DEFAULT_HEADERS = {
-    'Accept': 'application/json, text/plain, */*',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Content-Length': '0',
-    'DNT': '1',
-    'Host': 'www.kejiwanjia.com',
-    'Origin': 'https://www.kejiwanjia.com',
-    'Pragma': 'no-cache',
-    'Referer': 'https://www.kejiwanjia.com/gold/credit',
-    'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
-    'sec-ch-ua-mobile': '?0',
-    'sec-ch-ua-platform': '"Windows"',
-    'Sec-Fetch-Dest': 'empty',
-    'Sec-Fetch-Mode': 'cors',
-    'Sec-Fetch-Site': 'same-origin',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
-}
 import os
 import sys
 
-import requests
+import httpx
+
+DEFAULT_HEADERS = {
+    'accept': 'application/json, text/plain, */*',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'cache-control': 'no-cache',
+    'connection': 'keep-alive',
+    'content-Length': '0',
+    'dnt': '1',
+    'host': 'www.kejiwanjia.com',
+    'origin': 'https://www.kejiwanjia.com',
+    'pragma': 'no-cache',
+    'referer': 'https://www.kejiwanjia.com/',
+    'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-origin',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
+}
 
 """
 http headers
@@ -41,7 +40,6 @@ http headers
 
 # 签到用的url
 SIGN_URL = 'https://www.kejiwanjia.com/wp-json/b2/v1/userMission'
-UserAgent = ''
 
 # 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "KEJIWANJIA_COOKIE"
@@ -49,9 +47,7 @@ KEY_OF_COOKIE = "KEJIWANJIA_COOKIE"
 
 class SignBot(object):
     def __init__(self):
-        self.session = requests.Session()
-        # 添加 headers
-        self.session.headers = DEFAULT_HEADERS
+        self.client = httpx.Client(headers=DEFAULT_HEADERS, http2=True)
 
     def json_check(self, msg):
         """
@@ -67,14 +63,14 @@ class SignBot(object):
         """
         起一个带cookie的session
         """
-        self.session.headers['Authorization'] = cookies
-        self.session.headers['Cookie'] = 'b2_token=' + cookies
+        self.client.headers['authorization'] = 'Bearer ' + cookies
+        self.client.headers['cookie'] = 'b2_token=' + cookies
 
     def checkin(self, cookies):
         """
         签到函数
         """
-        msg = self.session.post(SIGN_URL)
+        msg = self.client.post(SIGN_URL)
         if self.json_check(msg):
             return msg.json()
         return msg.content
@@ -111,14 +107,10 @@ if __name__ == '__main__':
         result = bot.checkin(c)
         logout(result)
         credit = 0
-        if result.isdigit():
+        try:
+            credit = result["credit"]
+        except Exception as e:
             credit = int(result)
-        else:
-            js = json.loads(json.dumps(eval(bytes.decode(result))))
-            if bot.json_check(js):
-                credit = js["credit"]
-            else:
-                credit = int(result)
         if send:
             send("科技玩家自动签到，获得 : " + str(credit) + " 分", "good job！")
         index += 1

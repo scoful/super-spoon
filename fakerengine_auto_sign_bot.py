@@ -8,11 +8,10 @@ new Env('faker engine自动签到');
 '''
 
 import datetime
-import json
 import os
 import sys
 
-import requests
+import httpx
 
 """
 http headers
@@ -35,11 +34,11 @@ DEFAULT_HEADERS = {
     'upgrade-insecure-requests': '1',
     'referer': 'https://www.fakerengine.com/gold/credit',
     'origin': 'https://www.fakerengine.com',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 }
 
 # 签到用的url
 SIGN_URL = 'https://www.fakerengine.com/wp-json/b2/v1/userMission'
-UserAgent = ''
 
 # 环境变量中用于存放cookie的key值，多个号用|分隔
 KEY_OF_COOKIE = "FAKERENGINE_COOKIE"
@@ -47,9 +46,7 @@ KEY_OF_COOKIE = "FAKERENGINE_COOKIE"
 
 class SignBot(object):
     def __init__(self):
-        self.session = requests.Session()
-        # 添加 headers
-        self.session.headers = DEFAULT_HEADERS
+        self.client = httpx.Client(headers=DEFAULT_HEADERS, http2=True)
 
     def json_check(self, msg):
         """
@@ -65,14 +62,14 @@ class SignBot(object):
         """
         起一个带cookie的session
         """
-        self.session.headers['authorization'] = cookies
-        self.session.headers['cookie'] = 'b2_token=' + cookies
+        self.client.headers['authorization'] = 'Bearer ' + cookies
+        self.client.headers['cookie'] = 'b2_token=' + cookies
 
     def checkin(self, cookies):
         """
         签到函数
         """
-        msg = self.session.post(SIGN_URL)
+        msg = self.client.post(SIGN_URL)
         if self.json_check(msg):
             return msg.json()
         return msg.content
@@ -109,14 +106,10 @@ if __name__ == '__main__':
         result = bot.checkin(c)
         logout(result)
         credit = 0
-        if result.isdigit():
+        try:
+            credit = result["credit"]
+        except Exception as e:
             credit = int(result)
-        else:
-            js = json.loads(json.dumps(eval(bytes.decode(result))))
-            if bot.json_check(js):
-                credit = js["credit"]
-            else:
-                credit = int(result)
         if send:
             send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
         index += 1
