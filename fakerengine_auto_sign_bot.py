@@ -2,12 +2,14 @@
 faker engine自动签到脚本
 by scoful
 """
+
 '''
-cron: 2 */5 * * * fakerengine_auto_sign_bot.py
+cron: 2 23 * * * fakerengine_auto_sign_bot.py
 new Env('faker engine自动签到');
 '''
 
 import datetime
+import json
 import os
 import sys
 
@@ -38,11 +40,10 @@ DEFAULT_HEADERS = {
 }
 
 # 签到用的url
+LOG_IN_URL = 'https://www.fakerengine.com/wp-json/jwt-auth/v1/token'
 SIGN_URL = 'https://www.fakerengine.com/wp-json/b2/v1/userMission'
-GET_USER_INFO_URL = 'https://www.fakerengine.com/wp-json/b2/v1/getUserInfo'
 
-# 环境变量中用于存放cookie的key值，多个号用|分隔
-KEY_OF_COOKIE = "FAKERENGINE_COOKIE"
+KEY_OF_INFO = "FAKERENGINE_INFO"
 
 
 class SignBot(object):
@@ -66,7 +67,13 @@ class SignBot(object):
         self.client.headers['authorization'] = 'Bearer ' + cookies
         self.client.headers['cookie'] = 'b2_token=' + cookies
 
-    def checkin(self, cookies):
+    def logIn(self, username, password):
+        data = {'username': username, 'password': password}
+        msg = self.client.post(url=LOG_IN_URL, data=data)
+        data = json.loads(msg.text)
+        return data['token']
+
+    def checkin(self):
         """
         签到函数
         """
@@ -74,13 +81,6 @@ class SignBot(object):
         if self.json_check(msg):
             return msg.json()
         return msg.content
-
-    def getUserInfo(self, cookies):
-        msg = self.client.post(GET_USER_INFO_URL)
-        if msg.status_code == 403:
-            return False
-        else:
-            return True
 
 
 def load_send() -> None:
@@ -104,25 +104,20 @@ def logout(self):
 
 if __name__ == '__main__':
     bot = SignBot()
-    cookies = os.environ[KEY_OF_COOKIE]
-    cookieList = cookies.split("|")
-    logout("检测到{}个cookie记录\n开始签到".format(len(cookieList)))
-    index = 0
+    info = os.environ[KEY_OF_INFO]
+    infoList = info.split("|")
+    username = infoList[0]
+    password = infoList[1]
     load_send()
-    for c in cookieList:
-        bot.load_cookie_str(c)
-        if bot.getUserInfo(c):
-            result = bot.checkin(c)
-            logout(result)
-            credit = 0
-            try:
-                credit = result["credit"]
-            except Exception as e:
-                credit = int(result)
-            if send:
-                send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
-        else:
-            if send:
-                send("faker engine token失效！", "oop!!!")
-        index += 1
+    token = bot.logIn(username, password)
+    bot.load_cookie_str(token)
+    result = bot.checkin()
+    logout(result)
+    credit = 0
+    try:
+        credit = result["credit"]
+    except Exception as e:
+        credit = int(result)
+    if send:
+        send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
     logout("签到结束")

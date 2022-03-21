@@ -3,11 +3,12 @@
 by scoful
 """
 '''
-cron: 2 */5 * * * kejiwanjia_auto_sign_bot.py
+cron: 2 23 * * * kejiwanjia_auto_sign_bot.py
 new Env('科技玩家自动签到');
 '''
 
 import datetime
+import json
 import os
 import sys
 
@@ -19,12 +20,11 @@ DEFAULT_HEADERS = {
     'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
     'cache-control': 'no-cache',
     'connection': 'keep-alive',
-    'content-Length': '0',
     'dnt': '1',
     'host': 'www.kejiwanjia.com',
     'origin': 'https://www.kejiwanjia.com',
     'pragma': 'no-cache',
-    'referer': 'https://www.kejiwanjia.com/',
+    'referer': 'https://www.kejiwanjia.com/gold/credit',
     'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="99", "Google Chrome";v="99"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Windows"',
@@ -39,11 +39,10 @@ http headers
 """
 
 # 签到用的url
+LOG_IN_URL = 'https://www.kejiwanjia.com/wp-json/jwt-auth/v1/token'
 SIGN_URL = 'https://www.kejiwanjia.com/wp-json/b2/v1/userMission'
-GET_USER_INFO_URL = 'https://www.kejiwanjia.com/wp-json/b2/v1/getUserInfo'
 
-# 环境变量中用于存放cookie的key值，多个号用|分隔
-KEY_OF_COOKIE = "KEJIWANJIA_COOKIE"
+KEY_OF_INFO = "KEJIWANJIA_INFO"
 
 
 class SignBot(object):
@@ -67,7 +66,7 @@ class SignBot(object):
         self.client.headers['authorization'] = 'Bearer ' + cookies
         self.client.headers['cookie'] = 'b2_token=' + cookies
 
-    def checkin(self, cookies):
+    def checkin(self):
         """
         签到函数
         """
@@ -76,12 +75,11 @@ class SignBot(object):
             return msg.json()
         return msg.content
 
-    def getUserInfo(self, cookies):
-        msg = self.client.post(GET_USER_INFO_URL)
-        if msg.status_code == 403:
-            return False
-        else:
-            return True
+    def logIn(self, username, password):
+        data = {'username': username, 'password': password}
+        msg = self.client.post(url=LOG_IN_URL, data=data)
+        data = json.loads(msg.text)
+        return data['token']
 
 
 def load_send() -> None:
@@ -105,25 +103,20 @@ def logout(self):
 
 if __name__ == '__main__':
     bot = SignBot()
-    cookies = os.environ[KEY_OF_COOKIE]
-    cookieList = cookies.split("|")
-    logout("检测到{}个cookie记录\n开始签到".format(len(cookieList)))
-    index = 0
+    info = os.environ[KEY_OF_INFO]
+    infoList = info.split("|")
+    username = infoList[0]
+    password = infoList[1]
     load_send()
-    for c in cookieList:
-        bot.load_cookie_str(c)
-        if bot.getUserInfo(c):
-            result = bot.checkin(c)
-            logout(result)
-            credit = 0
-            try:
-                credit = result["credit"]
-            except Exception as e:
-                credit = int(result)
-            if send:
-                send("科技玩家自动签到，获得 : " + str(credit) + " 分", "good job！")
-        else:
-            if send:
-                send("科技玩家token失效！", "oop!!!")
-        index += 1
+    token = bot.logIn(username, password)
+    bot.load_cookie_str(token)
+    result = bot.checkin()
+    logout(result)
+    credit = 0
+    try:
+        credit = result["credit"]
+    except Exception as e:
+        credit = int(result)
+    if send:
+        send("科技玩家自动签到，获得 : " + str(credit) + " 分", "good job！")
     logout("签到结束")
