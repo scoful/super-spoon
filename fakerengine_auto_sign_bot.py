@@ -39,9 +39,9 @@ DEFAULT_HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'
 }
 
-# 签到用的url
 LOG_IN_URL = 'https://www.fakerengine.com/wp-json/jwt-auth/v1/token'
 SIGN_URL = 'https://www.fakerengine.com/wp-json/b2/v1/userMission'
+GET_MISSION_URL = 'https://www.fakerengine.com/wp-json/b2/v1/getUserMission'
 
 KEY_OF_INFO = "FAKERENGINE_INFO"
 
@@ -60,12 +60,15 @@ class SignBot(object):
         except Exception as e:
             return False
 
-    def load_cookie_str(self, cookies):
+    def load_cookie_str(self, cookies, actions):
         """
         起一个带cookie的session
         """
         self.client.headers['authorization'] = 'Bearer ' + cookies
-        self.client.headers['cookie'] = 'b2_token=' + cookies
+        if len(actions) > 0:
+            self.client.headers['cookie'] = 'b2_token=' + cookies + ';' + actions + ';'
+        else:
+            self.client.headers['cookie'] = 'b2_token=' + cookies + ';'
 
     def logIn(self, username, password):
         data = {'username': username, 'password': password}
@@ -81,6 +84,35 @@ class SignBot(object):
         if self.json_check(msg):
             return msg.json()
         return msg.content
+
+    def getMission(self):
+        data = {'count': 10, 'paged': 1}
+        msg = self.client.post(url=GET_MISSION_URL, data=data)
+        print(msg.request.headers.get('authorization'))
+        print(msg.request.headers.get('cookie'))
+        print(msg.text)
+        data = json.loads(msg.text)
+        credit = data['mission']['credit']
+        print(credit)
+        flag = False
+        if len(credit) > 0:
+            flag = True
+        action = ''
+        try:
+            aa = msg.headers.pop('set-cookie')
+            print(aa)
+            bb = aa.split(';')
+            print(bb)
+            cc = bb[len(bb) - 4]
+            if cc.find('SameSite=None, '):
+                print(cc.replace('SameSite=None, ', ''))
+                action = cc.replace('SameSite=None, ', '')
+            else:
+                action = cc
+        except Exception as e:
+            print(e)
+
+        return action, flag, credit
 
 
 def load_send() -> None:
@@ -110,14 +142,20 @@ if __name__ == '__main__':
     password = infoList[1]
     load_send()
     token = bot.logIn(username, password)
-    bot.load_cookie_str(token)
-    result = bot.checkin()
-    logout(result)
-    credit = 0
-    try:
-        credit = result["credit"]
-    except Exception as e:
-        credit = int(result)
-    if send:
-        send("faker engine自动签到，获得 : " + str(credit) + " 分", "good job！")
+    bot.load_cookie_str(token, '')
+    actions, flag, credit = bot.getMission()
+    if flag:
+        if send:
+            send("faker engine已经签到过，获得 : " + str(credit) + " 分", "good job！")
+    else:
+        bot.load_cookie_str(token, actions)
+        result = bot.checkin()
+        logout(result)
+        credit = 0
+        try:
+            credit = result["credit"]
+        except Exception as e:
+            credit = int(result)
+        if send:
+            send("faker engine成功自动签到，获得 : " + str(credit) + " 分", "good job！")
     logout("签到结束")
