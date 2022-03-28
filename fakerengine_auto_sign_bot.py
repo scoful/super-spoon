@@ -92,10 +92,10 @@ class SignBot(object):
         print(msg.request.headers.get('cookie'))
         print(msg.text)
         data = json.loads(msg.text)
-        credit = data['mission']['credit']
-        print(credit)
+        date = data['mission']['date']
+        print(date)
         flag = False
-        if len(credit) > 0:
+        if len(date) > 0:
             flag = True
         action = ''
         try:
@@ -112,7 +112,7 @@ class SignBot(object):
         except Exception as e:
             print(e)
 
-        return action, flag, credit
+        return action, flag, data['mission']['credit']
 
 
 def load_send() -> None:
