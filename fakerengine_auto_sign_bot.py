@@ -4,7 +4,7 @@ by scoful
 """
 
 '''
-cron: 2 23 * * * fakerengine_auto_sign_bot.py
+cron: 2 1 * * * fakerengine_auto_sign_bot.py
 new Env('faker engine自动签到');
 '''
 
@@ -88,24 +88,17 @@ class SignBot(object):
     def getMission(self):
         data = {'count': 10, 'paged': 1}
         msg = self.client.post(url=GET_MISSION_URL, data=data)
-        print(msg.request.headers.get('authorization'))
-        print(msg.request.headers.get('cookie'))
-        print(msg.text)
         data = json.loads(msg.text)
         date = data['mission']['date']
-        print(date)
         flag = False
         if len(date) > 0:
             flag = True
         action = ''
         try:
             aa = msg.headers.pop('set-cookie')
-            print(aa)
             bb = aa.split(';')
-            print(bb)
             cc = bb[len(bb) - 4]
             if cc.find('SameSite=None, '):
-                print(cc.replace('SameSite=None, ', ''))
                 action = cc.replace('SameSite=None, ', '')
             else:
                 action = cc
