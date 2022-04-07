@@ -87,8 +87,8 @@ class SignBot(object):
     def getMission(self):
         data = {'count': 10, 'paged': 1}
         msg = self.client.post(url=GET_MISSION_URL, data=data)
-        data = json.loads(msg.text)
-        date = data['mission']['date']
+        result = json.loads(msg.text)
+        date = result['mission']['date']
         flag = False
         if len(date) > 0:
             flag = True
@@ -104,7 +104,7 @@ class SignBot(object):
         except Exception as e:
             print(e)
 
-        return action, flag, data['mission']['credit']
+        return action, flag, result
 
 
 def load_send() -> None:
@@ -135,10 +135,12 @@ if __name__ == '__main__':
     load_send()
     token = bot.logIn(username, password)
     bot.load_cookie_str(token, '')
-    actions, flag, credit = bot.getMission()
+    actions, flag, result = bot.getMission()
     if flag:
         if send:
-            send("科技玩家已经签到过，获得 : " + str(credit) + " 分", "good job！")
+            send(
+                "科技玩家已经签到过，获得 : " + str(result['mission']['credit']) + " 分，总共：" + result['mission']['my_credit'] + " 分",
+                "good job！")
     else:
         bot.load_cookie_str(token, actions)
         result = bot.checkin()
@@ -149,5 +151,5 @@ if __name__ == '__main__':
         except Exception as e:
             credit = int(result)
         if send:
-            send("科技玩家成功自动签到，获得 : " + str(credit) + " 分", "good job！")
+            send("科技玩家成功自动签到，获得 : " + str(credit) + " 分，总共：" + result["mission"]["my_credit"] + " 分", "good job！")
     logout("签到结束")
