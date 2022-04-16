@@ -83,9 +83,7 @@ if __name__ == '__main__':
     for c in accountList:
         result = bot.checkOnline(c)
         msg = ""
-        if result["result"] == None:
-            msg = c + " 似乎写错了，检查一下！"
-        else:
+        if result["result"] != None:
             if result["result"]["online"] == False:
                 msg = "第" + str(index + 1) + "个账号：" + c + " 掉线啦！快瞅瞅\n注意下次考试时间:" + validationTime.strftime("%Y-%m-%d %H:%M:%S")
         if send and len(msg) > 0:
